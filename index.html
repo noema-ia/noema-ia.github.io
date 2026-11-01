@@ -57,21 +57,21 @@ p.tx{font-size:16px;line-height:1.55;color:#ddd;margin:0 0 12px}
 </main>
 <script>
 var REPOS={
- 'career-ops':{n:'career-ops',d:'Ferramenta open source que roda no seu computador: acha vagas, avalia cada uma e ajuda a adaptar o currículo, tudo com uma IA.',u:'https://github.com/santifer/career-ops',l:'MIT'},
- 'awesome-design-md':{n:'awesome-design-md',d:'Coleção de arquivos DESIGN.md com o estilo de sites conhecidos, para a IA montar telas parecidas. Use como inspiração.',u:'https://github.com/VoltAgent/awesome-design-md',l:'MIT'}
+ 'career-ops':{n:'career-ops',d:'Ferramenta open source que roda no seu computador: acha vagas, avalia cada uma e ajuda a adaptar o currículo, tudo com uma IA.',u:'https://github.com/career-ops-hq/career-ops',l:'MIT'},
+ 'awesome-design-md':{n:'awesome-design-md',d:'Mais de 80 arquivos DESIGN.md que ensinam a IA o visual de sites.',u:'https://github.com/VoltAgent/awesome-design-md',l:'MIT'}
 };
 /* PLAN: uma linha por peça postada. data AAAA-MM-DD, h = 14h|15h|19h, repo = chave de REPOS */
-var PLAN=[/*{data:'2026-11-02',h:'14h',repo:'career-ops'}*/];
+var PLAN=[{data:'2026-11-01',h:'14h',repo:'career-ops'},{data:'2026-11-01',h:'15h',repo:'awesome-design-md'}];
 var DN=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],ORD=[1,2,3,4,5,6,0];
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 var q=new URLSearchParams(location.search).get('d');
 var NOW=q?new Date(q+'T12:00:00'):new Date();
-function slots(wd){var s=[{h:'14h',t:'Vídeo'}];if(wd==1||wd==3||wd==5)s.push({h:'15h',t:'Carrossel'});s.push({h:'19h',t:'Vídeo'});return s}
+function slots(wd,dt){var s=[{h:'14h',t:'Vídeo'}];if(wd==1||wd==3||wd==5||find(dt,'15h'))s.push({h:'15h',t:'Carrossel'});s.push({h:'19h',t:'Vídeo'});return s}
 function weekDates(){var d=new Date(NOW),wd=d.getDay(),back=(wd+6)%7;d.setDate(d.getDate()-back);return ORD.map(function(w,i){var x=new Date(d);x.setDate(d.getDate()+i);return x})}
 var WK=weekDates(),mainT='hoje',dayI=WK.findIndex(function(x){return iso(x)==iso(NOW)}),slot=0;
 function find(date,h){return PLAN.filter(function(p){return p.data==date&&p.h==h})[0]}
 function btn(p,lab,sel,cls,fn){var b=document.createElement('button');b.innerHTML=lab;b.setAttribute('aria-selected',sel);if(cls)b.className=cls;b.onclick=fn;p.appendChild(b)}
-function cardHtml(r,tag,t){return '<article class="card"><div class="win"><i></i><i></i><i></i><span>'+t+'</span></div><div class="in2"><div class="rk">'+tag+'</div><h2 class="rn">'+r.n+'</h2><p class="rd">'+r.d+'</p><p class="lic">Licença '+r.l+' · código do autor, não da Noema</p><a class="btn" href="'+r.u+'" target="_blank" rel="noopener">Abrir no GitHub</a></div></article>'}
+function cardHtml(r,tag,t){return '<article class="card"><div class="win"><i></i><i></i><i></i><span>'+t+'</span></div><div class="in2"><div class="rk">'+tag+'</div><h2 class="rn">'+r.n+'</h2><p class="rd">'+r.d+'</p><p class="lic">Licença '+r.l+' · código do autor. A Noema só indica, sem parceria.</p><a class="btn" href="'+r.u+'" target="_blank" rel="noopener">Abrir no GitHub</a></div></article>'}
 function render(){
  var M=document.getElementById('main'),D=document.getElementById('days'),S=document.getElementById('slots'),O=document.getElementById('out');M.innerHTML=D.innerHTML=S.innerHTML=O.innerHTML='';
  [['hoje','Hoje'],['semana','Esta semana'],['ant','Anteriores']].forEach(function(x){btn(M,x[1],mainT==x[0],'',function(){mainT=x[0];slot=0;render()})});
@@ -80,7 +80,7 @@ function render(){
  var di=mainT=='hoje'?(dayI<0?0:dayI):(window._di==null?(dayI<0?0:dayI):window._di);
  D.style.display=mainT=='semana'?'flex':'none';S.style.display='flex';
  if(mainT=='semana')WK.forEach(function(x,i){btn(D,DN[x.getDay()]+(iso(x)==iso(NOW)?'<small>hoje</small>':'<small>'+x.getDate()+'/'+(x.getMonth()+1)+'</small>'),di==i,'',function(){window._di=i;slot=0;render()})});
- var d=WK[di],ss=slots(d.getDay());if(slot>=ss.length)slot=0;
+ var d=WK[di],ss=slots(d.getDay(),iso(d));if(slot>=ss.length)slot=0;
  ss.forEach(function(s,i){btn(S,s.h+'<small>'+s.t+'</small>',slot==i,'',function(){slot=i;render()})});
  var s=ss[slot],p=find(iso(d),s.h);
  O.innerHTML=p?cardHtml(REPOS[p.repo],DN[d.getDay()].toUpperCase()+' · '+s.h,s.t+' · '+s.h):'<div class="empty">Ainda não saiu. '+s.t+' das '+s.h+' chega aqui quando for ao ar.</div>'
